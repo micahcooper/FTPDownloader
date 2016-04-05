@@ -1,4 +1,4 @@
-package oie.model;
+package oie.ftp;
 import javax.swing.ProgressMonitor;
 
 import com.jcraft.jsch.SftpProgressMonitor;

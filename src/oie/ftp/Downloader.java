@@ -1,4 +1,4 @@
-package oie.model;
+package oie.ftp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -38,14 +38,21 @@ public class Downloader {
 	
 	public void download(String source, String destination){
 		SftpProgressMonitor monitor = new MyProgressMonitor();
+		String filename = "";
+		
 		if( source.endsWith("/") ){
 			System.out.println("directory");
 			
 			try {
-				Vector<ChannelSftp.LsEntry> list = sftp.ls(".");
+				Vector<ChannelSftp.LsEntry> list = sftp.ls(source);
 				int mode = ChannelSftp.OVERWRITE;
-				System.out.println(source+files.get(i));
-				sftp.get(source+files.get(i), destination, monitor, mode);
+				
+				for( int i=0; i<list.size(); i++)
+					if( isFile( (ChannelSftp.LsEntry)list.get(i) )){
+						System.out.println( ((ChannelSftp.LsEntry)list.get(i)).getFilename() );
+						filename = ((ChannelSftp.LsEntry)list.get(i)).getFilename();
+						sftp.get(source+filename, destination, monitor, mode);
+					}
 			} catch (SftpException e) {
 				System.out.println(e.getMessage());
 			}
@@ -96,50 +103,10 @@ public class Downloader {
 		return null;
 	}
 	
-	private class SFTPFile
-	 {
-	     private SftpATTRS sftpAttributes;
-
-	     public SFTPFile(LsEntry lsEntry)
-	     {
-	         this.sftpAttributes = lsEntry.getAttrs();
-	     }
-
-	     public boolean isFile()
-	     {
-	         return (!sftpAttributes.isDir() && !sftpAttributes.isLink());
-	     }
-	 }
 	 
-	  private List<SFTPFile> getFiles(String path)
+	  private boolean isFile(ChannelSftp.LsEntry entry)
 	  {
-	      List<SFTPFile> files = null;
-	      try
-	      {
-	          List<?> lsEntries = sftp.ls(path);
-	          if (lsEntries != null)
-	          {
-	              files = new ArrayList<SFTPFile>();
-	              for (int i = 0; i < lsEntries.size(); i++)
-	              {
-	                  Object next = lsEntries.get(i);
-	                  if (!(next instanceof LsEntry))
-	                  {
-	                      // throw exception
-	                  }
-	                  SFTPFile sftpFile = new SFTPFile((LsEntry) next);
-	                  if (sftpFile.isFile())
-	                  {
-	                	  System.out.println("adding file: "+lsEntries.get(i).toString());
-	                      files.add(sftpFile);
-	                  }
-	              }
-	          }
-	      }
-	      catch (SftpException sftpException)
-	      {
-	          //
-	      }
-	      return files;
+		  System.out.println( entry.getLongname() );
+		  return (!entry.getAttrs().isDir() && !entry.getAttrs().isLink() );
 	  }
 }

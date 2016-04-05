@@ -1,10 +1,6 @@
-package oie.controller;
+package oie.ftp;
 
 import com.jcraft.jsch.Session;
-
-
-import oie.model.Downloader;
-import oie.model.Reader;
 
 public class startJob {
 	private Reader read;

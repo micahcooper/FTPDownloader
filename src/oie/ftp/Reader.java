@@ -1,7 +1,7 @@
 /**
  * 
  */
-package oie.model;
+package oie.ftp;
 
 import java.io.File;
 import java.io.FileReader;
