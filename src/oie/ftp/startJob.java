@@ -23,9 +23,8 @@ public class startJob {
 	public startJob(String paramsLoc) {
 		getDownloadDetails(paramsLoc);
 
-		downloader = new Downloader();
 		try{
-			downloader.setupSession(host,user,password);
+			downloader = new Downloader(host,user,password);
 			downloader.connect();
 		}catch(Exception e){System.out.println(e.getMessage());}
 		downloader.download(filename, destination);

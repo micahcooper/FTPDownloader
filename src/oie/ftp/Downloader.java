@@ -1,10 +1,13 @@
 package oie.ftp;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Vector;
 
-import com.jcraft.jsch.*;
-import com.jcraft.jsch.ChannelSftp.LsEntry;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.SftpProgressMonitor;
 
 
 public class Downloader {
@@ -15,19 +18,30 @@ public class Downloader {
 	Channel channel;
 	ChannelSftp sftp;
 
-	public Downloader() {
-		System.out.println("new sftp");
-	}
+	public Downloader(String host, String user, String password) {
+		JSch secureChannel;
 
-	public Downloader(Session session) {
-		this.session = session;
-		System.out.println("new overloaded downloader");
+		try {
+			secureChannel = new JSch();
+			
+			//secureChannel.setKnownHosts(filepath + "\\src\\known-host");
+			secureChannel.addIdentity(password);
+			this.session = secureChannel.getSession(user, host, 22);
+			java.util.Properties config = new java.util.Properties();
+			config.put("StrictHostKeyChecking", "no");
+			config.put("PreferredAuthentications", 
+	                  "publickey,keyboard-interactive,password");
+			session.setConfig(config);
+
+		} catch (Exception e) {
+			System.out.println( e.getMessage() );
+		}
+
 	}
 
 	public void connect() {
 		try {
 			session.connect();
-			System.out.println("here");
 			this.channel = session.openChannel("sftp");
 			channel.connect();
 			this.sftp = (ChannelSftp) channel;
@@ -44,6 +58,7 @@ public class Downloader {
 			System.out.println("directory");
 			
 			try {
+				@SuppressWarnings("unchecked")
 				Vector<ChannelSftp.LsEntry> list = sftp.ls(source);
 				int mode = ChannelSftp.OVERWRITE;
 				
@@ -81,32 +96,9 @@ public class Downloader {
 	public void setSession(Session session) {
 		this.session = session;
 	}
-
-	public Session setupSession(String host, String user, String password) {
-		JSch secureChannel;
-
-		try {
-			secureChannel = new JSch();
-			
-			//secureChannel.setKnownHosts(filepath + "\\src\\known-host");
-			secureChannel.addIdentity(password);
-			this.session = secureChannel.getSession(user, host, 22);
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			config.put("PreferredAuthentications", 
-	                  "publickey,keyboard-interactive,password");
-			session.setConfig(config);
-			return session;
-		} catch (Exception e) {
-			System.out.println( e.getMessage() );
-		}
-		return null;
-	}
 	
-	 
-	  private boolean isFile(ChannelSftp.LsEntry entry)
-	  {
-		  System.out.println( entry.getLongname() );
-		  return (!entry.getAttrs().isDir() && !entry.getAttrs().isLink() );
-	  }
+	private boolean isFile(ChannelSftp.LsEntry entry) {
+		System.out.println( entry.getLongname() );
+		return (!entry.getAttrs().isDir() && !entry.getAttrs().isLink() );
+	}
 }
