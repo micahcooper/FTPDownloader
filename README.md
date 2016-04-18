@@ -1,2 +1,2 @@
 # FTPDownloader
-a simple java program to automate downloads with a ftp server
+a simple java program to download files from a sftp server with certificate authentication
