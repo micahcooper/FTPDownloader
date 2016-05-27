@@ -4,19 +4,18 @@ import com.jcraft.jsch.Session;
 
 public class startJob {
 	private Reader read;
-	private String host, user,password;
-	private String filename,destination;
+	private String host, user,password,src_dir,dst_dir,dst_filename;
 	Session session;
 	Downloader downloader;
 	
 	public static void main(String[] args) {
 		String paramsLoc = "";
 		
-		if( args.length > 0 ){
+		//if( args.length > 0 ){
 			paramsLoc = args[0];
 			new startJob(paramsLoc);
-		}
-		else
+		//}
+		//else
 			System.out.println("Failed to provide cmd args");
 	}
 
@@ -27,7 +26,7 @@ public class startJob {
 			downloader = new Downloader(host,user,password);
 			downloader.connect();
 		}catch(Exception e){System.out.println(e.getMessage());}
-		downloader.download(filename, destination);
+		downloader.download(src_dir, dst_dir, dst_filename);
 		downloader.getSession().disconnect();
 	}
 
@@ -40,12 +39,20 @@ public class startJob {
 
 	private boolean parseParams( String params ){
 		String[] param = params.split(",");
+		dst_filename=null;
 		
-		host = param[0];
-		user = param[1];
-		password = param[2];
-		filename = param[3];
-		destination = param[4];
+		if(param.length > 4){
+			host = param[0];
+			user = param[1];
+			password = param[2];
+			src_dir = param[3];
+			dst_dir = param[4];
+		}
+		if(param.length > 5)
+			dst_filename = param[5];
+		
+		System.out.println("####" + dst_filename);
+		
 		
 		return true;
 	}

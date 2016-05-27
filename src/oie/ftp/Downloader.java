@@ -50,23 +50,26 @@ public class Downloader {
 		}
 	}
 	
-	public void download(String source, String destination){
+	public void download(String src_dir, String dst_dir, String dst_filename){
 		SftpProgressMonitor monitor = new MyProgressMonitor();
-		String filename = "";
+		String src_filename = "";
 		
-		if( source.endsWith("/") ){
+		if( src_dir.endsWith("/") ){
 			System.out.println("directory");
 			
 			try {
 				@SuppressWarnings("unchecked")
-				Vector<ChannelSftp.LsEntry> list = sftp.ls(source);
+				Vector<ChannelSftp.LsEntry> list = sftp.ls(src_dir);
 				int mode = ChannelSftp.OVERWRITE;
 				
 				for( int i=0; i<list.size(); i++)
 					if( isFile( (ChannelSftp.LsEntry)list.get(i) )){
 						System.out.println( ((ChannelSftp.LsEntry)list.get(i)).getFilename() );
-						filename = ((ChannelSftp.LsEntry)list.get(i)).getFilename();
-						sftp.get(source+filename, destination, monitor, mode);
+						src_filename = ((ChannelSftp.LsEntry)list.get(i)).getFilename();
+						if(dst_filename == null)
+							sftp.get(src_dir+src_filename, dst_dir, monitor, mode);
+						else
+							sftp.get(src_dir+src_filename, dst_dir+"/"+dst_filename, monitor, mode);
 					}
 			} catch (SftpException e) {
 				System.out.println(e.getMessage());
@@ -75,7 +78,7 @@ public class Downloader {
 		else
 			try {
 				int mode = ChannelSftp.OVERWRITE;
-				sftp.get(source, destination, monitor, mode);
+				sftp.get(src_dir, dst_dir, monitor, mode);
 			} catch (SftpException e) {
 				System.out.println(e.getMessage());
 			}
